@@ -48,7 +48,7 @@ document.getElementById('twoPlayersBtn').addEventListener('click', () => {
 
 document.getElementById('botBtn').addEventListener('click', () => {
     gameMode = 'vsBot';
-    // startGame();
+    startGame();
 });
 
 document.getElementById('rulesBtn').addEventListener('click', () => {
@@ -145,13 +145,20 @@ function handleCellClick(row, col, cell) {
     const hasBiggerFigure = figures.some(f => !f.used && f.size > maxSizeOnBoard);
 
     if (!hasBiggerFigure) {
+        setTimeout(() => {
         alert('Ничья!');
         window.location.reload();
         return;
+        }, 1500);
     }
     }
 
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+
+    if (gameMode === 'vsBot' && currentPlayer === 'O') {
+    makeBotMove();
+    }
+
     setupFigureSelection();
 
     } else {
@@ -260,44 +267,107 @@ function checkWin(){{
 
     return null;
 }}
-        /*function canPlaceFigure(index, check){
-    const cellContent = board[index];
-   
 
-    if(board[index] === null || selectFigure.size > board[index].size){
-        console.log(check);
-        check = true;
-        return check;
-    }else{
-        console.log(check);
-        check = false;
-        return check;
-    }
-    
-}*/
-   /* function PlaceFigure(){
-        if(canPlaceFigure(index) === true){
-             cell.textContent = 'X';
-        }else{
-            alert('ERORR');
+function makeBotMove(){
+    setTimeout(() =>{
+
+    let botFigure = figuresO.find(f => !f.used);
+    if (!botFigure) return;
+
+    selectedFigure = botFigure;
+
+    for(let i = 0; i < figuresO.length; i++){
+        const figure = figuresO[i];
+        if(figure.used) continue;
+
+        for(let row = 0; row < 3; row++){
+            for(let col = 0; col < 3; col++){
+                const index = row * 3 + col;
+                const cell = document.getElementById(`cell-${row}-${col}`);
+
+                if(canPlaceFigure(index)){
+                    const originalCell = board[index];
+                    board[index] = { size: figure.size, player: 'O' };
+
+                    const result = checkWin();
+                    if(result && result.winner === 'O'){
+                        figure.used = true;
+                        cell.textContent = `O${figure.size}`;
+                        cell.style.fontSize = `${figure.size * 6 + 12}px`;
+
+                        result.line.forEach(i => {
+                            const row = Math.floor(i / 3);
+                            const col = i % 3;
+                            const c = document.getElementById(`cell-${row}-${col}`);
+                            c.classList.add('winning-cell');
+                        });
+
+                        setTimeout(() => {
+                            alert("Победил игрок O (бот)!");
+                            window.location.reload();
+                        }, 3000);
+                        return;
+                    }
+                    board[index] = originalCell;
+                }
+            }
         }
-    }*/
+        console.log(`проверяю фигуру размера ${figure.size}`);
+    }
 
-      /*  function selectFigure(){
-            if (currentPlayer === 'X'){
-                let figures = currentPlayer ==='X' ? figuresX : figuresO;
-                if(figuresX[index].used === false){
-                    selectedFigure = figuresX[index];
-                    figuresX[index].used = true;
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    for(let i = 0; i < figuresO.length; i++){
+        const figure = figuresO[i];
+        if(figure.used) continue;
+
+        for(let row = 0; row < 3; row++){
+            for(let col = 0; col < 3; col++){
+                const index = row *3 + col;
+                const cell = document.getElementById(`cell-${row}-${col}`);
+
+                if(canPlaceFigure(index)){
+                    const originalCell = board[index];
+                    board[index] = { size: figure.size, player: 'X' };
+                    const result = checkWin();
+                    board[index] = originalCell;
+                    
+                    if(result && result.winner === 'X'){
+                        board[index] = { size: figure.size, player: 'O' };
+                        figure.used = true;
+                        cell.textContent = `O${figure.size}`;
+                        cell.style.fontSize = `${figure.size * 6 + 12}px`;
+
+                        currentPlayer = 'X';
+                        setupFigureSelection();
+                        return;
+                    }
                 }
+            } 
+        }
+    }
+    for (let priority of [
+        [1, 1],                                 
+        [0, 0], [0, 2], [2, 0], [2, 2],        
+        [0, 1], [1, 0], [1, 2], [2, 1]          
+    ]) {
+        for (let i = 0; i < figuresO.length; i++) {
+            const figure = figuresO[i];
+            if (figure.used) continue;
+
+            const [row, col] = priority;
+            const index = row * 3 + col;
+            const cell = document.getElementById(`cell-${row}-${col}`);
+
+            if (canPlaceFigure(index)) {
+                board[index] = { size: figure.size, player: 'O' };
+                figure.used = true;
+                cell.textContent = `O${figure.size}`;
+                cell.style.fontSize = `${figure.size * 6 + 12}px`;
+
+                currentPlayer = 'X';
+                setupFigureSelection();
+                return;
             }
-            if(currentPlayer === 'O'){
-                let figures = currentPlayer ==='X' ? figuresX : figuresO;
-                if(figuresO[index].used === false){
-                    selectedFigure = figuresO[index];
-                    figuresO[index].used = true;
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                }
-            }
-        }*/
+        }
+    }
+}, 800);
+}
