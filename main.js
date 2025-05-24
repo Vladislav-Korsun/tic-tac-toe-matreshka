@@ -1,3 +1,12 @@
+const sounds = {
+  place: new Audio('sounds/place.mp3'),
+  win: new Audio('sounds/win.mp3'),
+  lose: new Audio('sounds/lose.mp3'),
+  draw: new Audio('sounds/draw.mp3'),
+  error: new Audio('sounds/error.mp3'),
+  placeBot: new Audio('sounds/placeBot.mp3')
+};
+
 const menu = document.getElementById('menu');
 const game = document.getElementById('game');
 const rules = document.getElementById('rules');
@@ -95,7 +104,7 @@ function handleCellClick(row, col, cell) {
             size: selectedFigure.size,
             player: currentPlayer
         };
-
+        sounds.place.play();
         cell.textContent = currentPlayer + selectedFigure.size;
         cell.style.fontSize = `${selectedFigure.size * 6 + 12}px`;
 
@@ -119,6 +128,7 @@ function handleCellClick(row, col, cell) {
         const col = index % 3;
         const cell = document.getElementById(`cell-${row}-${col}`);
         cell.classList.add('winning-cell');
+        sounds.win.play();
     });
 
     
@@ -145,11 +155,13 @@ function handleCellClick(row, col, cell) {
     const hasBiggerFigure = figures.some(f => !f.used && f.size > maxSizeOnBoard);
 
     if (!hasBiggerFigure) {
+        highlightDrawCells();
+        sounds.draw.play();
         setTimeout(() => {
         alert('Ничья!');
         window.location.reload();
         return;
-        }, 1500);
+        }, 3000);
     }
     }
 
@@ -270,7 +282,7 @@ function checkWin(){{
 
 function makeBotMove(){
     setTimeout(() =>{
-
+    sounds.placeBot.play();
     let botFigure = figuresO.find(f => !f.used);
     if (!botFigure) return;
 
@@ -371,3 +383,11 @@ function makeBotMove(){
     }
 }, 800);
 }
+
+function highlightDrawCells() {
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach(cell => {
+        cell.classList.add('draw-cell');
+    });
+}
+
